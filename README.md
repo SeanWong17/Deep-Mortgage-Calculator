@@ -51,7 +51,7 @@ cd deep-mortgage-calculator
 4. 生成计划：点击底部按钮，查看详细的还款计划表、节省利息分析以及本金趋势图。
 
 ## 📸 截图
-![示例图像](example.png)
+![示例图像](example.jpg)
 
 ## 🤝 贡献 (Contributing)
 本项目是一个纯前端单页应用，欢迎提交 Issue 或 Pull Request 来改进代码或增加新功能。
