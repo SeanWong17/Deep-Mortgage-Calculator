@@ -1,6 +1,6 @@
 # 🏠 深度房贷计算器 (Deep Mortgage Calculator)
 
-> 一个支持 LPR 利率变动、提前还款策略对比的深度房贷分析工具。单文件，零依赖，手机/PC 均可完美使用。
+> 一个支持 LPR 利率变动、提前还款策略对比的深度房贷分析工具。零依赖，手机/PC 均可完美使用。
 
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
 ![Javascript](https://img.shields.io/badge/Vanilla%20JS-F7DF1E?logo=javascript&logoColor=black)
@@ -30,16 +30,9 @@
 
 ## 🚀 快速开始
 
-### 方式一：直接运行
-1. 下载本项目中的 `index.html` 文件。
-2. 双击使用浏览器（Chrome/Safari/Edge）打开即可。
+1. 下载本项目。
+2. 双击index.html使用浏览器（Chrome/Safari/Edge）打开即可。
 
-### 方式二：Clone 仓库
-```bash
-git clone [https://github.com/SeanWong17/deep-mortgage-calculator.git](https://github.com/SeanWong17/deep-mortgage-calculator.git)
-cd deep-mortgage-calculator
-# 并在浏览器中打开 index.html
-```
 
 ##  🛠️ 使用指南
 1. 设置基础信息：输入商贷和公积金的金额、初始利率、年限及还款方式（等额本息/本金）。

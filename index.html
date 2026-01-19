@@ -4,896 +4,336 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>深度房贷计算器</title>
-    <style>
-        :root { --primary: #2c3e50; --accent: #3498db; --light: #ecf0f1; --border: #bdc3c7; --red: #e74c3c; --green: #27ae60; --gold: #f1c40f; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f4f6f8; padding: 10px; color: #333; line-height: 1.5; margin: 0; }
-        .container { max-width: 1100px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        
-        h1 { text-align: center; color: var(--primary); margin-bottom: 15px; font-size: 1.4em; }
-        h4 { margin-bottom: 12px; font-size: 1em; }
-        
-        .flex-row { display: flex; gap: 15px; flex-wrap: wrap; }
-        .col-half { flex: 1; min-width: 280px; background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px; position: relative; }
-        .col-half.commercial { border-top: 4px solid var(--red); } 
-        .col-half.fund { border-top: 4px solid var(--green); }
-        .col-half.actions { border-top: 4px solid var(--accent); background: #fdfdfd; }
-        
-        .form-group { margin-bottom: 12px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9em; color: #555; }
-        input, select { width: 100%; padding: 12px 10px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        input:focus, select:focus { border-color: var(--accent); outline: none; }
-
-        .dynamic-list { margin-bottom: 10px; border: 1px solid #eee; border-radius: 4px; padding: 8px; background: #fff; min-height: 40px; }
-        .dynamic-row { display: flex; gap: 8px; margin-bottom: 10px; align-items: flex-start; background: #f8f9fa; padding: 10px; border-radius: 6px; border-left: 3px solid #ccc; flex-wrap: wrap; }
-        .dynamic-row.type-com { border-left-color: var(--red); }
-        .dynamic-row.type-fund { border-left-color: var(--green); }
-        
-        .dynamic-row .row-line { display: flex; gap: 8px; align-items: center; width: 100%; flex-wrap: wrap; }
-        
-        .date-badge { background: #e8e8e8; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; color: #555; white-space: nowrap; display: inline-block; min-width: 70px; text-align: center; }
-
-        .btn-sm { padding: 8px 12px; font-size: 0.9em; cursor: pointer; border-radius: 4px; border: 1px solid transparent; }
-        .btn-add { background: #eafaf1; color: var(--green); border-color: var(--green); width: 100%; padding: 12px; margin-top: 5px; border-style: dashed; font-size: 1em; }
-        .btn-add:hover, .btn-add:active { background: #d5f5e3; }
-        .btn-del { background: #fdedec; color: var(--red); border-color: var(--red); padding: 6px 10px; font-size: 1.1em; min-width: 36px; }
-
-        .analysis-dashboard { display: none; background: #fff8e1; border: 1px solid #ffe0b2; border-radius: 6px; padding: 15px; margin-top: 20px; margin-bottom: 10px; }
-        .analysis-header { color: #d35400; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; font-weight: bold; border-bottom: 1px solid #ffe0b2; padding-bottom: 10px; flex-wrap: wrap; font-size: 0.95em; }
-        
-        /* 优化：改为2列布局 */
-        .analysis-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-        .analysis-item { background: rgba(255,255,255,0.7); padding: 12px 8px; border-radius: 6px; text-align: center; }
-        .analysis-item span { display: block; font-size: 0.75em; color: #7f8c8d; }
-        .analysis-item strong { display: block; font-size: 1.1em; color: #2c3e50; margin-top: 4px; word-break: break-all; }
-
-        .analysis-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -15px; padding: 0 15px; }
-        .analysis-table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 0.85em; background: rgba(255,255,255,0.5); }
-        .analysis-table th { background: rgba(230, 126, 34, 0.1); color: #d35400; text-align: left; padding: 10px 8px; border:none; white-space: nowrap; }
-        .analysis-table td { padding: 10px 8px; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .analysis-table tr:last-child td { border-bottom: none; }
-        
-        .diff-good { color: var(--green) !important; font-weight: bold; }
-        .diff-bad { color: var(--red) !important; font-weight: bold; }
-        .diff-neutral { color: #7f8c8d; }
-
-        .btn-calc { display: block; width: 100%; padding: 16px; background: var(--accent); color: white; font-size: 1.1em; border: none; border-radius: 8px; cursor: pointer; margin-top: 15px; transition: background 0.2s; font-weight: bold; }
-        .btn-calc:hover, .btn-calc:active { background-color: #2980b9; }
-
-        .summary-box { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; background: var(--light); padding: 15px; border-radius: 6px; margin-top: 15px; text-align: center; }
-        .summary-item small { display: block; color: #7f8c8d; font-size: 0.8em; }
-        .summary-item strong { display: block; font-size: 1.1em; color: var(--primary); margin-top: 2px; }
-
-        .schedule-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -15px; padding: 0 15px; }
-        .schedule-table { width: 100%; min-width: 650px; border-collapse: collapse; margin-top: 15px; font-size: 0.8em; }
-        .schedule-table th, .schedule-table td { border: 1px solid #ddd; padding: 8px 6px; text-align: right; }
-        .schedule-table th { background: #f1f2f6; text-align: center; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
-        .schedule-table tr:nth-child(even) { background-color: #fafafa; }
-        
-        .row-rate-change { background-color: #fff3cd !important; } 
-        .row-prepay { background-color: #d4edda !important; font-weight: bold; }
-        .note-tag { display: inline-block; padding: 2px 4px; border-radius: 3px; font-size: 0.8em; margin-right: 2px; color: #fff; }
-        .bg-red { background: var(--red); }
-        .bg-green { background: var(--green); }
-        .bg-blue { background: var(--accent); }
-        
-        .tip-box { background: #e8f4fd; border-left: 4px solid var(--accent); padding: 12px; margin: 15px 0; font-size: 0.85em; color: #2c3e50; border-radius: 0 4px 4px 0; }
-        .tip-box strong { color: var(--accent); }
-
-        .chart-container { position: relative; height: 200px; width: 100%; }
-        .chart-legend { text-align: center; margin-top: 8px; font-size: 0.75em; color: #666; }
-        .chart-legend span { display: inline-block; margin: 0 8px; }
-
-        /* 移动端优化 */
-        @media (max-width: 600px) {
-            body { padding: 8px; }
-            .container { padding: 12px; border-radius: 6px; }
-            h1 { font-size: 1.2em; margin-bottom: 12px; }
-            
-            .col-half { min-width: 100%; padding: 12px; }
-            .flex-row { gap: 12px; }
-            
-            .form-group { margin-bottom: 10px; }
-            
-            .dynamic-row { padding: 10px; gap: 6px; }
-            .dynamic-row .row-line { gap: 6px; }
-            
-            .dynamic-row select { font-size: 14px; padding: 10px 6px; }
-            .dynamic-row input { font-size: 14px; padding: 10px 6px; }
-            
-            .input-with-badge { display: flex; flex-direction: column; gap: 4px; }
-            .input-with-badge input { width: 100%; }
-            
-            .analysis-grid { grid-template-columns: 1fr; gap: 8px; }
-            .analysis-item { padding: 10px; }
-            .analysis-item strong { font-size: 1em; }
-            
-            .summary-box { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px; }
-            .summary-item strong { font-size: 1em; }
-            
-            .chart-container { height: 180px; }
-            
-            .tip-box { font-size: 0.8em; padding: 10px; }
-            
-            .btn-calc { padding: 14px; font-size: 1em; }
-            
-            .scroll-hint { display: block; text-align: center; color: #999; font-size: 0.75em; margin-bottom: 5px; }
-            .scroll-hint::before { content: '👆 '; }
-        }
-        
-        @media (min-width: 601px) {
-            .scroll-hint { display: none; }
-        }
-
-        /* 输入框组优化 */
-        .input-group { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-        .input-group .input-item { flex: 1; min-width: 60px; }
-        .input-group .input-item.type-select { flex: 0 0 75px; }
-        .input-group .input-item.strategy-select { flex: 0 0 90px; }
-        .input-group .input-item.delete-btn { flex: 0 0 36px; }
-        
-        @media (max-width: 400px) {
-            .input-group { gap: 4px; }
-            .input-group .input-item { min-width: 50px; }
-            .input-group .input-item.type-select { flex: 0 0 65px; }
-            .input-group .input-item.strategy-select { flex: 0 0 80px; }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
-<div class="container">
-    <h1>🏠 深度房贷计算器</h1>
+<div class="app-container">
+    <!-- 头部 -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-building-columns"></i>
+                <span>深度房贷计算器</span>
+            </div>
+            <p class="tagline">智能分析 · 精准计算 · 科学决策</p>
+        </div>
+    </header>
 
-    <div class="form-group" style="max-width: 300px; margin: 0 auto 15px auto; text-align:center;">
-        <label>📅 首次还款年月</label>
-        <input type="month" id="startDate" value="2025-01" onchange="updateAllDates()">
-    </div>
-
-    <div class="flex-row">
-        <div class="col-half commercial">
-            <h4 style="color:var(--red)">🏦 商贷信息</h4>
-            <div class="form-group">
-                <label>贷款金额 (万元)</label>
-                <input type="number" id="comAmount" value="100" inputmode="decimal">
-            </div>
-            <div class="form-group">
-                <label>初始年利率 (%)</label>
-                <input type="number" id="comRate" value="3.1" step="0.01" inputmode="decimal">
-            </div>
-            <div class="form-group">
-                <label>期限 (年)</label>
-                <input type="number" id="comYear" value="30" inputmode="numeric">
-            </div>
-            <div class="form-group">
-                <label>还款方式</label>
-                <select id="comMethod">
-                    <option value="1">等额本息</option>
-                    <option value="2">等额本金</option>
-                </select>
+    <main class="main-content">
+        <!-- 起始日期 -->
+        <div class="date-selector">
+            <div class="date-card">
+                <i class="fas fa-calendar-alt"></i>
+                <div class="date-input-wrap">
+                    <label>首次还款年月</label>
+                    <input type="month" id="startDate" value="2025-01" onchange="updateAllDates()">
+                </div>
             </div>
         </div>
 
-        <div class="col-half fund">
-            <h4 style="color:var(--green)">🏠 公积金信息</h4>
-            <div class="form-group">
-                <label>贷款金额 (万元) </label>
-                <input type="number" id="fundAmount" value="100" inputmode="decimal">
+        <!-- 贷款信息卡片 -->
+        <div class="loan-cards">
+            <div class="loan-card commercial">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h3>商业贷款</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>贷款金额</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="comAmount" value="100" inputmode="decimal">
+                            <span class="unit">万元</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>年利率</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="comRate" value="3.1" step="0.01" inputmode="decimal">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>贷款期限</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="comYear" value="30" inputmode="numeric">
+                                <span class="unit">年</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>还款方式</label>
+                            <select id="comMethod">
+                                <option value="1">等额本息</option>
+                                <option value="2">等额本金</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <label>初始年利率 (%)</label>
-                <input type="number" id="fundRate" value="2.85" step="0.01" inputmode="decimal">
-            </div>
-            <div class="form-group">
-                <label>期限 (年)</label>
-                <input type="number" id="fundYear" value="30" inputmode="numeric">
-            </div>
-            <div class="form-group">
-                <label>还款方式</label>
-                <select id="fundMethod">
-                    <option value="1">等额本息</option>
-                    <option value="2">等额本金</option>
-                </select>
-            </div>
-        </div>
-    </div>
 
-    <div class="flex-row" style="margin-top: 15px;">
-        <div class="col-half actions">
-            <label>📈 利率调整</label>
-            <div id="rateList" class="dynamic-list"></div>
-            <button class="btn-sm btn-add" onclick="addRateRow()">+ 添加利率调整</button>
-        </div>
-
-        <div class="col-half actions">
-            <label>💰 提前还款</label>
-            <div id="prepayList" class="dynamic-list"></div>
-            <button class="btn-sm btn-add" onclick="addPrepayRow()">+ 添加提前还款</button>
-        </div>
-    </div>
-
-    <div class="tip-box">
-        <strong>💡 小贴士：</strong>缩短年限通常比减少月供能节省更多利息。但减少月供能降低每月还款压力，请根据自身情况选择。
-    </div>
-
-    <div id="analysisArea" class="analysis-dashboard">
-        <div class="analysis-header">
-            <span>📊 变动影响分析</span>
-            <small style="font-weight:normal; color:#7f8c8d">(对比原计划)</small>
-        </div>
-        
-        <div class="analysis-grid">
-            <div class="analysis-item">
-                <span>累计节省金额</span>
-                <strong id="diffInterest">0</strong>
+            <div class="loan-card fund">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <h3>公积金贷款</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>贷款金额</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fundAmount" value="100" inputmode="decimal">
+                            <span class="unit">万元</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>年利率</label>
+                        <div class="input-with-unit">
+                            <input type="number" id="fundRate" value="2.85" step="0.01" inputmode="decimal">
+                            <span class="unit">%</span>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>贷款期限</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fundYear" value="30" inputmode="numeric">
+                                <span class="unit">年</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>还款方式</label>
+                            <select id="fundMethod">
+                                <option value="1">等额本息</option>
+                                <option value="2">等额本金</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="analysis-item">
-                <span>周期缩短</span>
-                <strong id="diffTime" style="margin-top:0;">0 个月</strong>
-            </div>
-        </div>
-
-        <div style="background: #fff; padding: 12px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #eee;">
-            <h5 style="margin:0 0 8px 0; color:#2c3e50; font-size:0.9em;">📉 本金剩余趋势对比</h5>
-            <div class="chart-container">
-                <canvas id="loanChart"></canvas>
-            </div>
-            <div class="chart-legend">
-                <span>- - - 原计划</span>
-                <span>━━ 新计划</span>
-            </div>
-        </div>
-        
-        <div style="margin-top:12px;">
-            <h5 style="margin:0 0 8px 0; color:#e67e22; font-size:0.9em;">📝 变动收益详情</h5>
-            <span class="scroll-hint">左右滑动查看完整表格</span>
-            <div class="analysis-table-wrap">
-                <table class="analysis-table">
-                    <thead>
-                        <tr>
-                            <th>时间</th>
-                            <th>事件</th>
-                            <th>利息变动</th>
-                            <th>时间变动</th>
-                        </tr>
-                    </thead>
-                    <tbody id="analysisDetailBody"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <button class="btn-calc" onclick="calculateAll()">📊 生成还款计划</button>
-
-    <div id="resultArea" style="display:none">
-        <h3 style="border-left:5px solid var(--accent); padding-left:10px; margin-top:20px; font-size:1.1em;">计算结果</h3>
-        <div class="summary-box">
-            <div class="summary-item"><small>实际还款总额</small><strong id="resTotal">0</strong></div>
-            <div class="summary-item"><small>实际利息总额</small><strong id="resInterest">0</strong></div>
-            <div class="summary-item"><small>商贷利息</small><strong id="resComInt">0</strong></div>
-            <div class="summary-item"><small>公积金利息</small><strong id="resFundInt">0</strong></div>
         </div>
 
-        <span class="scroll-hint" style="margin-top:15px;">左右滑动查看完整表格</span>
-        <div class="schedule-wrap">
-            <table class="schedule-table">
-                <thead>
-                    <tr>
-                        <th>期</th>
-                        <th>年月</th>
-                        <th>本月还</th>
-                        <th>商贷</th>
-                        <th>公积金</th>
-                        <th>剩余本金</th>
-                        <th>备注</th>
-                    </tr>
-                </thead>
-                <tbody id="resultBody"></tbody>
-            </table>
+        <!-- 事件管理 -->
+        <div class="events-section">
+            <div class="event-card">
+                <div class="event-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h4>利率调整</h4>
+                </div>
+                <div id="rateList" class="event-list"></div>
+                <button class="btn-add" onclick="addRateRow()">
+                    <i class="fas fa-plus"></i>
+                    添加利率调整
+                </button>
+            </div>
+
+            <div class="event-card">
+                <div class="event-header">
+                    <i class="fas fa-hand-holding-dollar"></i>
+                    <h4>提前还款</h4>
+                </div>
+                <div id="prepayList" class="event-list"></div>
+                <button class="btn-add" onclick="addPrepayRow()">
+                    <i class="fas fa-plus"></i>
+                    添加提前还款
+                </button>
+            </div>
         </div>
-    </div>
+
+        <!-- 提示信息 -->
+        <div class="tip-card">
+            <div class="tip-icon">
+                <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="tip-content">
+                <strong>智能建议</strong>
+                <p>缩短年限通常比减少月供能节省更多利息，但减少月供能降低每月还款压力。请根据自身现金流情况合理选择。</p>
+            </div>
+        </div>
+
+        <!-- 计算按钮 -->
+        <button class="btn-calculate" onclick="calculateAll()">
+            <i class="fas fa-calculator"></i>
+            生成还款计划
+        </button>
+
+        <!-- 分析面板 -->
+        <div id="analysisArea" class="analysis-panel">
+            <div class="panel-header">
+                <i class="fas fa-chart-pie"></i>
+                <h3>变动影响分析</h3>
+                <span class="badge">对比原计划</span>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card savings">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">累计节省</span>
+                        <strong id="diffInterest">¥0</strong>
+                    </div>
+                </div>
+                <div class="stat-card time">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <span class="stat-label">周期变化</span>
+                        <strong id="diffTime">0 个月</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h5><i class="fas fa-chart-area"></i> 本金剩余趋势对比</h5>
+                <div class="chart-container">
+                    <canvas id="loanChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item old"><span class="line dashed"></span>原计划</span>
+                    <span class="legend-item new"><span class="line solid"></span>新计划</span>
+                </div>
+            </div>
+
+            <div class="detail-card">
+                <h5><i class="fas fa-list-check"></i> 变动收益明细</h5>
+                <div class="table-wrap">
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th>时间</th>
+                                <th>事件</th>
+                                <th>利息变动</th>
+                                <th>时间变动</th>
+                            </tr>
+                        </thead>
+                        <tbody id="analysisDetailBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 结果区域 -->
+        <div id="resultArea" class="result-panel">
+            <div class="panel-header">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h3>还款计划表</h3>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-card total">
+                    <i class="fas fa-wallet"></i>
+                    <div>
+                        <span>还款总额</span>
+                        <strong id="resTotal">¥0</strong>
+                    </div>
+                </div>
+                <div class="summary-card interest">
+                    <i class="fas fa-percent"></i>
+                    <div>
+                        <span>利息总额</span>
+                        <strong id="resInterest">¥0</strong>
+                    </div>
+                </div>
+                <div class="summary-card commercial">
+                    <i class="fas fa-landmark"></i>
+                    <div>
+                        <span>商贷利息</span>
+                        <strong id="resComInt">¥0</strong>
+                    </div>
+                </div>
+                <div class="summary-card fund">
+                    <i class="fas fa-piggy-bank"></i>
+                    <div>
+                        <span>公积金利息</span>
+                        <strong id="resFundInt">¥0</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="schedule-card">
+                <div class="table-wrap">
+                    <table class="schedule-table">
+                        <thead>
+                            <tr>
+                                <th>期数</th>
+                                <th>日期</th>
+                                <th>月供合计</th>
+                                <th>商贷</th>
+                                <th>公积金</th>
+                                <th>剩余本金</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>© 2025 深度房贷计算器 · 仅供参考，请以实际为准</p>
+    </footer>
 </div>
 
+<!-- 模板 -->
 <template id="tpl-rate">
-    <div class="dynamic-row" onchange="updateRowColor(this)">
-        <div class="input-group">
-            <div class="input-item type-select">
-                <select class="evt-type">
-                    <option value="com">商贷</option>
-                    <option value="fund">公积金</option>
-                </select>
-            </div>
-            <div class="input-item">
-                <input type="number" class="evt-month" placeholder="第几期" inputmode="numeric" oninput="updateDatePreview(this)">
-            </div>
-            <div class="input-item" style="flex:0 0 auto;">
+    <div class="event-row" onchange="updateRowColor(this)">
+        <div class="event-row-content">
+            <select class="evt-type">
+                <option value="com">商贷</option>
+                <option value="fund">公积金</option>
+            </select>
+            <div class="input-group">
+                <input type="number" class="evt-month" placeholder="期数" inputmode="numeric" oninput="updateDatePreview(this)">
                 <span class="date-badge">---</span>
             </div>
-            <div class="input-item">
-                <input type="number" class="evt-val" placeholder="新利率%" step="0.01" inputmode="decimal">
+            <div class="input-with-unit small">
+                <input type="number" class="evt-val" placeholder="利率" step="0.01" inputmode="decimal">
+                <span class="unit">%</span>
             </div>
-            <div class="input-item delete-btn">
-                <button class="btn-sm btn-del" onclick="this.closest('.dynamic-row').remove()">×</button>
-            </div>
+            <button class="btn-del" onclick="this.closest('.event-row').remove()">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         </div>
     </div>
 </template>
 
 <template id="tpl-prepay">
-    <div class="dynamic-row" onchange="updateRowColor(this)">
-        <div class="input-group">
-            <div class="input-item type-select">
-                <select class="evt-type">
-                    <option value="com">商贷</option>
-                    <option value="fund">公积金</option>
-                </select>
-            </div>
-            <div class="input-item">
-                <input type="number" class="evt-month" placeholder="第几期" inputmode="numeric" oninput="updateDatePreview(this)">
-            </div>
-            <div class="input-item" style="flex:0 0 auto;">
+    <div class="event-row" onchange="updateRowColor(this)">
+        <div class="event-row-content">
+            <select class="evt-type">
+                <option value="com">商贷</option>
+                <option value="fund">公积金</option>
+            </select>
+            <div class="input-group">
+                <input type="number" class="evt-month" placeholder="期数" inputmode="numeric" oninput="updateDatePreview(this)">
                 <span class="date-badge">---</span>
             </div>
-            <div class="input-item">
-                <input type="number" class="evt-val" placeholder="金额(万)" inputmode="decimal">
+            <div class="input-with-unit small">
+                <input type="number" class="evt-val" placeholder="金额" inputmode="decimal">
+                <span class="unit">万</span>
             </div>
-            <div class="input-item strategy-select">
-                <select class="evt-strat">
-                    <option value="1">减月供</option>
-                    <option value="2">减年限</option>
-                </select>
-            </div>
-            <div class="input-item delete-btn">
-                <button class="btn-sm btn-del" onclick="this.closest('.dynamic-row').remove()">×</button>
-            </div>
+            <select class="evt-strat">
+                <option value="1">减月供</option>
+                <option value="2">减年限</option>
+            </select>
+            <button class="btn-del" onclick="this.closest('.event-row').remove()">
+                <i class="fas fa-trash-alt"></i>
+            </button>
         </div>
     </div>
 </template>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        addRateRow('com', 6, 3.0);
-        addRateRow('fund', 13, 2.6);
-        updateAllDates();
-    });
-
-    function addRateRow(type, month, val) {
-        const tpl = document.getElementById('tpl-rate');
-        const node = tpl.content.cloneNode(true);
-        const div = node.querySelector('.dynamic-row');
-        
-        if(type) div.querySelector('.evt-type').value = type;
-        if(month) div.querySelector('.evt-month').value = month;
-        if(val) div.querySelector('.evt-val').value = val;
-        
-        document.getElementById('rateList').appendChild(node);
-        const addedRow = document.getElementById('rateList').lastElementChild;
-        updateRowColor(addedRow);
-        updateDatePreview(addedRow.querySelector('.evt-month'));
-    }
-
-    function addPrepayRow(type, month, val, strat) {
-        const tpl = document.getElementById('tpl-prepay');
-        const node = tpl.content.cloneNode(true);
-        const div = node.querySelector('.dynamic-row');
-        
-        if(type) div.querySelector('.evt-type').value = type;
-        if(month) div.querySelector('.evt-month').value = month;
-        if(val) div.querySelector('.evt-val').value = val;
-        if(strat) div.querySelector('.evt-strat').value = strat;
-
-        document.getElementById('prepayList').appendChild(node);
-        const addedRow = document.getElementById('prepayList').lastElementChild;
-        updateRowColor(addedRow);
-        updateDatePreview(addedRow.querySelector('.evt-month'));
-    }
-
-    function updateRowColor(row) {
-        const typeEl = row.querySelector('.evt-type');
-        if (!typeEl) return;
-        const type = typeEl.value;
-        row.classList.remove('type-com', 'type-fund');
-        row.classList.add(type === 'com' ? 'type-com' : 'type-fund');
-    }
-
-    function updateDatePreview(input) {
-        const monthIdx = parseInt(input.value);
-        const row = input.closest('.dynamic-row');
-        const badge = row.querySelector('.date-badge');
-        const startVal = document.getElementById('startDate').value;
-        
-        if (!startVal || isNaN(monthIdx) || monthIdx < 1) {
-            badge.innerText = '---';
-            return;
-        }
-        const [y, m] = startVal.split('-').map(Number);
-        const d = new Date(y, m - 1 + monthIdx - 1);
-        badge.innerText = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    }
-
-    function updateAllDates() {
-        document.querySelectorAll('.evt-month').forEach(el => updateDatePreview(el));
-    }
-
-    function calculateAll() {
-        const startStr = document.getElementById('startDate').value;
-        const [startYear, startMonth] = startStr.split('-').map(Number);
-
-        let rawEvents = [];
-
-        document.querySelectorAll('#rateList .dynamic-row').forEach(row => {
-            let m = parseInt(row.querySelector('.evt-month').value);
-            let r = parseFloat(row.querySelector('.evt-val').value);
-            let t = row.querySelector('.evt-type').value;
-            if(m && !isNaN(r)) rawEvents.push({ type: 'rate', loanType: t, month: m, val: r/100, desc: `${t==='com'?'商贷':'公积金'}利率调为${r}%` });
-        });
-
-        document.querySelectorAll('#prepayList .dynamic-row').forEach(row => {
-            let m = parseInt(row.querySelector('.evt-month').value);
-            let amt = parseFloat(row.querySelector('.evt-val').value);
-            let strat = row.querySelector('.evt-strat').value;
-            let t = row.querySelector('.evt-type').value;
-            let stratName = strat === '1' ? '减月供' : '减年限';
-            if(m && !isNaN(amt)) rawEvents.push({ type: 'pay', loanType: t, month: m, val: amt*10000, strategy: strat, desc: `${t==='com'?'商':'公'}提前还${amt}万(${stratName})` });
-        });
-
-        const getParams = (events) => {
-            const comRates = events.filter(e => e.type === 'rate' && e.loanType === 'com').map(e => ({ month: e.month, rate: e.val }));
-            const fundRates = events.filter(e => e.type === 'rate' && e.loanType === 'fund').map(e => ({ month: e.month, rate: e.val }));
-            const comPays = events.filter(e => e.type === 'pay' && e.loanType === 'com').map(e => ({ month: e.month, amount: e.val, strategy: e.strategy }));
-            const fundPays = events.filter(e => e.type === 'pay' && e.loanType === 'fund').map(e => ({ month: e.month, amount: e.val, strategy: e.strategy }));
-
-            const p = (type, r, pay) => ({
-                principal: parseFloat(document.getElementById(type+'Amount').value) * 10000,
-                rate: parseFloat(document.getElementById(type+'Rate').value) / 100,
-                months: parseInt(document.getElementById(type+'Year').value) * 12,
-                method: document.getElementById(type+'Method').value,
-                rateEvents: r,
-                payEvents: pay
-            });
-
-            return { com: p('com', comRates, comPays), fund: p('fund', fundRates, fundPays) };
-        };
-
-        let eventMonths = [...new Set(rawEvents.map(e => e.month))].sort((a,b) => a - b);
-        let analysisSteps = [];
-        
-        let baseParams = getParams([]);
-        let baseRes = {
-            com: calculateLoan(baseParams.com),
-            fund: calculateLoan(baseParams.fund)
-        };
-        let lastTotalInt = baseRes.com.totalInterest + baseRes.fund.totalInterest;
-        let lastMaxMonth = Math.max(baseRes.com.schedule.length, baseRes.fund.schedule.length);
-
-        let activeEvents = [];
-        
-        eventMonths.forEach(m => {
-            let monthEvents = rawEvents.filter(e => e.month === m);
-            activeEvents = [...activeEvents, ...monthEvents];
-            
-            let currParams = getParams(activeEvents);
-            let currRes = {
-                com: calculateLoan(currParams.com),
-                fund: calculateLoan(currParams.fund)
-            };
-            
-            let currTotalInt = currRes.com.totalInterest + currRes.fund.totalInterest;
-            let currMaxMonth = Math.max(currRes.com.schedule.length, currRes.fund.schedule.length);
-            
-            let deltaInt = lastTotalInt - currTotalInt;
-            let deltaTime = lastMaxMonth - currMaxMonth;
-
-            let dateObj = new Date(startYear, startMonth - 1 + m - 1);
-            let dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}`;
-
-            analysisSteps.push({
-                month: m,
-                date: dateStr,
-                events: monthEvents,
-                deltaInt: deltaInt,
-                deltaTime: deltaTime
-            });
-
-            lastTotalInt = currTotalInt;
-            lastMaxMonth = currMaxMonth;
-        });
-
-        let finalParams = getParams(rawEvents);
-        let finalCom = calculateLoan(finalParams.com);
-        let finalFund = calculateLoan(finalParams.fund);
-
-        let finalDeltaInt = (baseRes.com.totalInterest + baseRes.fund.totalInterest) - (finalCom.totalInterest + finalFund.totalInterest);
-        let finalDeltaTotal = (baseRes.com.totalPay + baseRes.fund.totalPay) - (finalCom.totalPay + finalFund.totalPay);
-        
-        let comTimeDiff = baseRes.com.schedule.length - finalCom.schedule.length;
-        let fundTimeDiff = baseRes.fund.schedule.length - finalFund.schedule.length;
-        
-        document.getElementById('analysisArea').style.display = 'block';
-        renderAnalysis(finalDeltaInt, finalDeltaTotal, comTimeDiff, fundTimeDiff, analysisSteps, rawEvents.length > 0);
-        
-        setTimeout(() => {
-            drawChart(baseRes, finalCom, finalFund, startYear, startMonth);
-        }, 50);
-
-        renderTable(finalCom, finalFund, startYear, startMonth);
-        
-        document.getElementById('analysisArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function renderAnalysis(diffInt, diffTotal, diffComTime, diffFundTime, steps, hasEvents) {
-        const formatMoney = (val) => (val >= 0 ? '省 ' : '涨 ') + Math.abs(val).toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0});
-        
-        const elInt = document.getElementById('diffInterest');
-        elInt.innerText = formatMoney(diffInt);
-        elInt.className = diffInt > 0 ? 'diff-good' : (diffInt < 0 ? 'diff-bad' : 'diff-neutral');
-
-        // Removed logic for diffTotal since the element is removed
-
-        const elTime = document.getElementById('diffTime');
-        
-        const fmtTime = (v) => {
-            if (v > 0) return `<span class="diff-good">-${v}月</span>`;
-            if (v < 0) return `<span class="diff-bad">+${Math.abs(v)}月</span>`;
-            return `<span style="color:#aaa">0</span>`;
-        };
-
-        elTime.innerHTML = `
-            <div style="font-size:0.7em; line-height:1.5; text-align:left;">
-                <div><span style="color:var(--red);">商</span>${fmtTime(diffComTime)}</div>
-                <div><span style="color:var(--green);">公</span>${fmtTime(diffFundTime)}</div>
-            </div>
-        `;
-
-        const tbody = document.getElementById('analysisDetailBody');
-        tbody.innerHTML = '';
-        
-        if (steps.length === 0) {
-             let tr = document.createElement('tr');
-             tr.innerHTML = `<td colspan="4" style="text-align:center; color:#999; padding:15px;">无变动事件</td>`;
-             tbody.appendChild(tr);
-        } else {
-            steps.forEach(step => {
-                let tr = document.createElement('tr');
-                let descHtml = step.events.map(e => e.desc).join('<br>');
-                let intClass = step.deltaInt > 0 ? 'diff-good' : (step.deltaInt < 0 ? 'diff-bad' : 'diff-neutral');
-                let intText = step.deltaInt === 0 ? '-' : (step.deltaInt > 0 ? `省${Math.abs(step.deltaInt).toLocaleString(undefined, {maximumFractionDigits:0})}` : `亏${Math.abs(step.deltaInt).toLocaleString(undefined, {maximumFractionDigits:0})}`);
-                let timeClass = step.deltaTime > 0 ? 'diff-good' : (step.deltaTime < 0 ? 'diff-bad' : 'diff-neutral');
-                let timeText = step.deltaTime === 0 ? '-' : (step.deltaTime > 0 ? `-${step.deltaTime}月` : `+${Math.abs(step.deltaTime)}月`);
-
-                tr.innerHTML = `
-                    <td><span class="date-badge">${step.date}</span><br><small style="color:#999">${step.month}期</small></td>
-                    <td style="font-size:0.85em;">${descHtml}</td>
-                    <td class="${intClass}">${intText}</td>
-                    <td class="${timeClass}">${timeText}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    }
-
-    function calculateLoan(params) {
-        let { principal, rate, months, method, rateEvents, payEvents } = params;
-        
-        let schedule = [];
-        let balance = principal;
-        let currentRate = rate / 12;
-        let totalInterest = 0;
-        let totalPay = 0;
-        let totalMonths = months;
-
-        if (principal <= 0) return { schedule: [], totalInterest: 0, totalPay: 0 };
-
-        let idx = 1;
-        while (balance > 0.01 && idx <= 800) {
-            let note = [];
-            let isRateChange = false;
-            let isPrepay = false;
-            let extraPay = 0;
-
-            let rEvt = rateEvents.find(e => e.month === idx);
-            if (rEvt) {
-                currentRate = rEvt.rate / 12;
-                isRateChange = true;
-                note.push(`利率${(rEvt.rate*100).toFixed(2)}%`);
-            }
-
-            let pEvts = payEvents.filter(e => e.month === idx);
-            let strategy = '1';
-            
-            if (pEvts.length > 0) {
-                isPrepay = true;
-                
-                let currentBasePmt = 0;
-                if (schedule.length > 0) {
-                    currentBasePmt = schedule[schedule.length - 1].basePay;
-                } else {
-                    if (method === '1') {
-                        currentBasePmt = (balance * currentRate * Math.pow(1 + currentRate, totalMonths)) / (Math.pow(1 + currentRate, totalMonths) - 1);
-                    } else {
-                        currentBasePmt = (balance / totalMonths) + (balance * currentRate);
-                    }
-                }
-
-                let totalPrepayAmt = 0;
-                pEvts.forEach(p => { totalPrepayAmt += p.amount; strategy = p.strategy; });
-                
-                if (totalPrepayAmt > balance) totalPrepayAmt = balance;
-                extraPay = totalPrepayAmt;
-                balance -= extraPay;
-                note.push(`还${(extraPay/10000).toFixed(1)}万`);
-
-                if (balance > 0 && strategy === '2') {
-                    note.push(`减年限`);
-                    let newRemainMonths = 0;
-                    
-                    if (method === '1') {
-                        let targetPmt = currentBasePmt;
-                        let monthlyInterest = balance * currentRate;
-                        
-                        if (monthlyInterest >= targetPmt) {
-                            newRemainMonths = 1;
-                        } else {
-                            let n = Math.log(targetPmt / (targetPmt - monthlyInterest)) / Math.log(1 + currentRate);
-                            newRemainMonths = Math.ceil(n);
-                        }
-                    } else {
-                        let remainBeforePrepay = totalMonths - idx + 1;
-                        let balanceBeforePrepay = balance + extraPay;
-                        let principalPerMonth = balanceBeforePrepay / remainBeforePrepay;
-                        newRemainMonths = Math.ceil(balance / principalPerMonth);
-                    }
-                    
-                    if (newRemainMonths < 1) newRemainMonths = 1;
-                    totalMonths = idx + newRemainMonths - 1;
-                } else if (balance > 0) {
-                    note.push(`减月供`);
-                }
-            }
-
-            let remainMonths = totalMonths - idx + 1;
-            if (remainMonths < 1) remainMonths = 1;
-            
-            let monthInterest = balance * currentRate;
-            let monthPrincipal = 0;
-            let monthPayment = 0;
-
-            if (balance > 0) {
-                if (method === '1') {
-                    if (remainMonths === 1) {
-                        monthPrincipal = balance;
-                        monthPayment = monthPrincipal + monthInterest;
-                    } else {
-                        monthPayment = (balance * currentRate * Math.pow(1 + currentRate, remainMonths)) / (Math.pow(1 + currentRate, remainMonths) - 1);
-                        monthPrincipal = monthPayment - monthInterest;
-                    }
-                } else {
-                    monthPrincipal = balance / remainMonths;
-                    monthPayment = monthPrincipal + monthInterest;
-                }
-                
-                if (monthPrincipal > balance) {
-                    monthPrincipal = balance;
-                    monthPayment = monthPrincipal + monthInterest;
-                }
-            }
-
-            if (isPrepay && balance > 0) {
-                note.push(`新供${Math.round(monthPayment).toLocaleString()}`);
-            }
-
-            let actualPay = monthPayment + extraPay;
-            balance -= monthPrincipal;
-            if (balance < 0.01) balance = 0;
-            totalInterest += monthInterest;
-            totalPay += actualPay;
-
-            schedule.push({
-                idx: idx,
-                pay: actualPay,
-                basePay: monthPayment,
-                principal: monthPrincipal,
-                interest: monthInterest,
-                balance: balance,
-                note: note.join('; '),
-                isEvent: isRateChange || isPrepay
-            });
-
-            if (balance <= 0.01) break;
-            idx++;
-        }
-
-        return { schedule, totalInterest, totalPay };
-    }
-
-    function renderTable(comData, fundData, startYear, startMonth) {
-        document.getElementById('resultArea').style.display = 'block';
-        
-        let totalAll = 0; 
-        let totalInt = comData.totalInterest + fundData.totalInterest;
-
-        const tbody = document.getElementById('resultBody');
-        tbody.innerHTML = '';
-
-        let maxLen = Math.max(comData.schedule.length, fundData.schedule.length);
-
-        for (let i = 0; i < maxLen; i++) {
-            let c = comData.schedule[i] || { pay:0, basePay:0, interest:0, balance:0, note:'' };
-            let f = fundData.schedule[i] || { pay:0, basePay:0, interest:0, balance:0, note:'' };
-
-            let currentTotalPay = c.pay + f.pay;
-            totalAll += currentTotalPay;
-
-            let d = new Date(startYear, startMonth - 1 + i);
-            let dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-
-            let tr = document.createElement('tr');
-            if (c.note.includes('还') || f.note.includes('还')) tr.classList.add('row-prepay');
-            else if (c.note.includes('利率') || f.note.includes('利率')) tr.classList.add('row-rate-change');
-
-            let noteHtml = '';
-            if (c.note) noteHtml += `<span class="note-tag bg-red">商</span>${c.note}<br>`;
-            if (f.note) noteHtml += `<span class="note-tag bg-green">公</span>${f.note}`;
-
-            tr.innerHTML = `
-                <td>${i + 1}</td>
-                <td style="white-space:nowrap">${dateStr}</td>
-                <td style="font-weight:bold; color:var(--primary)">${currentTotalPay.toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-                <td>${c.pay > 0 ? c.pay.toLocaleString(undefined, {maximumFractionDigits:0}) : '-'}</td>
-                <td>${f.pay > 0 ? f.pay.toLocaleString(undefined, {maximumFractionDigits:0}) : '-'}</td>
-                <td style="color:#7f8c8d">${(c.balance + f.balance).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
-                <td style="font-size:0.8em; color:#555; line-height:1.3; white-space:nowrap">${noteHtml}</td>
-            `;
-            tbody.appendChild(tr);
-        }
-
-        document.getElementById('resTotal').innerText = totalAll.toLocaleString(undefined, {maximumFractionDigits:0});
-        document.getElementById('resInterest').innerText = totalInt.toLocaleString(undefined, {maximumFractionDigits:0});
-        document.getElementById('resComInt').innerText = comData.totalInterest.toLocaleString(undefined, {maximumFractionDigits:0});
-        document.getElementById('resFundInt').innerText = fundData.totalInterest.toLocaleString(undefined, {maximumFractionDigits:0});
-    }
-
-    function drawChart(baseRes, finalCom, finalFund, startYear, startMonth) {
-        const canvas = document.getElementById('loanChart');
-        const ctx = canvas.getContext('2d');
-        const parent = canvas.parentElement;
-        
-        const dpr = window.devicePixelRatio || 1;
-        const rect = parent.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        canvas.style.width = rect.width + 'px';
-        canvas.style.height = rect.height + 'px';
-        ctx.scale(dpr, dpr);
-        
-        const width = rect.width;
-        const height = rect.height;
-        ctx.clearRect(0, 0, width, height);
-
-        const getBalanceSeries = (cSched, fSched) => {
-            const arr = [];
-            const len = Math.max(cSched.length, fSched.length);
-            for(let i=0; i<len; i++) {
-                let b1 = i < cSched.length ? cSched[i].balance : 0;
-                let b2 = i < fSched.length ? fSched[i].balance : 0;
-                arr.push(b1 + b2);
-            }
-            const initialTotal = (parseFloat(document.getElementById('comAmount').value) + parseFloat(document.getElementById('fundAmount').value)) * 10000;
-            return [initialTotal, ...arr];
-        };
-
-        const baseData = getBalanceSeries(baseRes.com.schedule, baseRes.fund.schedule);
-        const currData = getBalanceSeries(finalCom.schedule, finalFund.schedule);
-        
-        const maxPoints = Math.max(baseData.length, currData.length);
-        if(maxPoints < 2) return;
-
-        const maxBalance = Math.max(baseData[0], currData[0]);
-
-        const isMobile = width < 400;
-        const p = { t: 15, r: 10, b: 25, l: isMobile ? 30 : 40 };
-        const dw = width - p.l - p.r;
-        const dh = height - p.t - p.b;
-        
-        const getX = (i) => p.l + (i / (maxPoints - 1)) * dw;
-        const getY = (val) => p.t + dh - (val / maxBalance) * dh;
-
-        ctx.strokeStyle = '#f0f0f0';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        for(let i=0; i<=4; i++) {
-            let y = p.t + (dh / 4) * i;
-            ctx.moveTo(p.l, y);
-            ctx.lineTo(width - p.r, y);
-            ctx.fillStyle = '#999';
-            ctx.font = (isMobile ? '9' : '10') + 'px Arial';
-            ctx.textAlign = 'right';
-            ctx.fillText(((maxBalance * (4-i)/4)/10000).toFixed(0) + 'w', p.l - 3, y + 3);
-        }
-        ctx.stroke();
-
-        ctx.fillStyle = '#999';
-        ctx.textAlign = 'center';
-        ctx.font = (isMobile ? '9' : '10') + 'px Arial';
-        
-        const yearInterval = maxPoints > 180 ? 10 : (maxPoints > 120 ? 5 : (isMobile ? 5 : 3));
-        const step = yearInterval * 12;
-
-        for(let i=0; i < maxPoints; i += step) {
-            let x = getX(i);
-            let d = new Date(startYear, startMonth - 1 + i);
-            ctx.fillText(d.getFullYear(), x, height - 8);
-        }
-
-        const drawLine = (data, color, dashed) => {
-            ctx.beginPath();
-            ctx.strokeStyle = color;
-            ctx.lineWidth = isMobile ? 1.5 : 2;
-            if(dashed) ctx.setLineDash([4, 4]);
-            else ctx.setLineDash([]);
-            
-            data.forEach((val, i) => {
-                if(i===0) ctx.moveTo(getX(i), getY(val));
-                else ctx.lineTo(getX(i), getY(val));
-            });
-            if(data.length < maxPoints) {
-                ctx.lineTo(getX(maxPoints-1), getY(0));
-            }
-            ctx.stroke();
-        };
-
-        drawLine(baseData, '#bdc3c7', true);
-
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(52, 152, 219, 0.1)';
-        
-        currData.forEach((val, i) => {
-            if(i===0) ctx.moveTo(getX(i), getY(val));
-            else ctx.lineTo(getX(i), getY(val));
-        });
-
-        if(currData.length < maxPoints) {
-            ctx.lineTo(getX(currData.length), getY(0)); 
-            ctx.lineTo(getX(maxPoints-1), getY(0));
-        } else {
-            ctx.lineTo(getX(maxPoints-1), getY(0));
-        }
-
-        ctx.lineTo(getX(0), getY(0)); 
-        ctx.closePath();
-        ctx.fill();
-
-        drawLine(currData, '#3498db', false);
-    }
-    
-    window.addEventListener('resize', () => {
-        const area = document.getElementById('analysisArea');
-        if (area.style.display !== 'none') {
-            const startStr = document.getElementById('startDate').value;
-            if (startStr) {
-                const [startYear, startMonth] = startStr.split('-').map(Number);
-                const baseParams = {
-                    com: {
-                        principal: parseFloat(document.getElementById('comAmount').value) * 10000,
-                        rate: parseFloat(document.getElementById('comRate').value) / 100,
-                        months: parseInt(document.getElementById('comYear').value) * 12,
-                        method: document.getElementById('comMethod').value,
-                        rateEvents: [],
-                        payEvents: []
-                    },
-                    fund: {
-                        principal: parseFloat(document.getElementById('fundAmount').value) * 10000,
-                        rate: parseFloat(document.getElementById('fundRate').value) / 100,
-                        months: parseInt(document.getElementById('fundYear').value) * 12,
-                        method: document.getElementById('fundMethod').value,
-                        rateEvents: [],
-                        payEvents: []
-                    }
-                };
-            }
-        }
-    });
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
