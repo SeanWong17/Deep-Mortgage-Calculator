@@ -13,6 +13,10 @@
     <!-- 头部 -->
     <header class="app-header">
         <div class="header-content">
+            <button class="help-btn" type="button" onclick="openHelpModal()" aria-label="计算方式说明" title="计算方式说明">
+                <i class="fas fa-circle-question"></i>
+            </button>
+
             <div class="logo">
                 <i class="fas fa-building-columns"></i>
                 <span>深度房贷计算器</span>
@@ -332,6 +336,50 @@
         </div>
     </div>
 </template>
+
+<!-- 计算说明弹窗 -->
+<div id="helpModal" class="modal-overlay" aria-hidden="true" style="display:none;">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+        <div class="modal-header">
+            <h3 id="helpTitle"><i class="fas fa-circle-info"></i> 计算方式说明</h3>
+            <button class="modal-close" type="button" onclick="closeHelpModal()" aria-label="关闭">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <p style="margin-bottom:10px;">
+                本工具用于模拟组合贷（商贷/公积金）在<strong>利率调整</strong>与<strong>提前还款</strong>情况下的还款计划变化，帮助对比“减月供/减年限”策略。
+            </p>
+
+            <div class="modal-section">
+                <h4>核心规则</h4>
+                <ul>
+                    <li>按<strong>月</strong>进行迭代；每月利息约为：剩余本金 × (年利率/12)。</li>
+                    <li>等额本息：使用按剩余期数重算的月供公式；等额本金：本金按剩余期数均摊。</li>
+                    <li>利率调整：在指定“期数”起生效（从该期开始使用新年利率）。</li>
+                    <li>提前还款：在指定“期数”发生，支持“减月供 / 减年限”。</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>与实际可能存在轻微差异（重要）</h4>
+                <ul>
+                    <li>银行计息口径、扣款顺序（先扣月供还是先扣提前还款）、重定价日规则、日息/按月计息等细节可能不同。</li>
+                    <li>四舍五入与金额精度处理（元/分）会带来末期微小差异。</li>
+                    <li>罚息、违约金、最低提前还款额、次数限制等政策不在模拟范围内。</li>
+                </ul>
+                <p style="color:var(--gray-600); font-size:0.9em; margin-top:8px;">
+                    结论请以贷款合同与银行实际扣款为准。本工具仅供参考与方案对比。
+                </p>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="modal-btn" type="button" onclick="closeHelpModal()">我知道了</button>
+        </div>
+    </div>
+</div>
 
 <script src="script.js"></script>
 

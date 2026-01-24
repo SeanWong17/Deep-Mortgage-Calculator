@@ -585,3 +585,36 @@ window.addEventListener('resize', () => {
         }
     }
 });
+
+// ==================== 帮助弹窗 ====================
+
+function openHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+
+    // 点击遮罩关闭（点到卡片不关闭）
+    modal.addEventListener('click', onHelpOverlayClick);
+    document.addEventListener('keydown', onHelpEsc);
+}
+
+function closeHelpModal() {
+    const modal = document.getElementById('helpModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+
+    modal.removeEventListener('click', onHelpOverlayClick);
+    document.removeEventListener('keydown', onHelpEsc);
+}
+
+function onHelpOverlayClick(e) {
+    const card = e.currentTarget.querySelector('.modal-card');
+    if (!card) return;
+    if (!card.contains(e.target)) closeHelpModal();
+}
+
+function onHelpEsc(e) {
+    if (e.key === 'Escape') closeHelpModal();
+}

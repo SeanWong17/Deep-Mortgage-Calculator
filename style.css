@@ -996,3 +996,151 @@ select:focus {
         font-size: 0.75em;
     }
 }
+
+/* ==================== 帮助按钮 & 弹窗 ==================== */
+.header-content {
+    position: relative; /* 让 help-btn 绝对定位相对 header-content */
+}
+
+.help-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateY(-6px);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.help-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateY(-8px);
+}
+
+.help-btn i {
+    font-size: 18px;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 41, 66, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.modal-card {
+    width: min(720px, 100%);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 18px;
+    background: var(--accent-gradient);
+    color: #fff;
+}
+
+.modal-header h3 {
+    font-size: 1.05em;
+    font-weight: 700;
+    flex: 1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-close {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.modal-body {
+    padding: 16px 18px;
+    color: var(--gray-700);
+    font-size: 0.95em;
+    line-height: 1.7;
+}
+
+.modal-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.modal-section h4 {
+    font-size: 0.95em;
+    margin-bottom: 8px;
+    color: var(--gray-800);
+}
+
+.modal-body ul {
+    padding-left: 18px;
+}
+
+.modal-body li {
+    margin: 6px 0;
+}
+
+.modal-footer {
+    padding: 14px 18px 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: var(--gray-50);
+}
+
+.modal-btn {
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.modal-btn:hover {
+    background: var(--accent-light);
+}
+
+@media (max-width: 640px) {
+    .help-btn {
+        width: 38px;
+        height: 38px;
+        transform: translateY(-4px);
+    }
+}
