@@ -998,32 +998,49 @@ select:focus {
 }
 
 /* ==================== 帮助按钮 & 弹窗 ==================== */
+
+.app-header {
+    position: relative;
+}
+
+.app-header::before {
+    pointer-events: none;
+    z-index: 0;
+}
+
 .header-content {
-    position: relative; /* 让 help-btn 绝对定位相对 header-content */
+    position: relative;
+    z-index: 1;
+    width: 100%;
 }
 
 .help-btn {
     position: absolute;
-    top: 0;
-    right: 0;
-    transform: translateY(-6px);
+    top: 16px;
+    right: 16px;
+
     width: 40px;
     height: 40px;
     border: none;
     border-radius: 999px;
+
     background: rgba(255, 255, 255, 0.18);
     color: #fff;
     cursor: pointer;
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
+
     transition: var(--transition);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+    transform: none;
 }
 
 .help-btn:hover {
     background: rgba(255, 255, 255, 0.28);
-    transform: translateY(-8px);
+    transform: translateY(-2px);
 }
 
 .help-btn i {
@@ -1141,6 +1158,7 @@ select:focus {
     .help-btn {
         width: 38px;
         height: 38px;
-        transform: translateY(-4px);
+        top: 12px;
+        right: 12px;
     }
 }
