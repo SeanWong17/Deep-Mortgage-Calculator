@@ -1,0 +1,18 @@
+{
+  "name": "deep-mortgage-calculator",
+  "version": "2.0.0",
+  "private": true,
+  "description": "支持利率调整与提前还款的纯前端组合房贷计算器",
+  "scripts": {
+    "check": "node --check loan-engine.js && node --check validation.js && node --check renderers.js && node --check app.js && node --check playwright.config.js",
+    "test": "node --test",
+    "test:e2e": "playwright test",
+    "verify": "npm run check && npm test && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}

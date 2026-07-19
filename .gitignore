@@ -1,0 +1,7 @@
+.codegraph/
+.DS_Store
+node_modules/
+coverage/
+playwright-report/
+test-results/
+*.log

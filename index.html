@@ -2,386 +2,436 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com data:; script-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
     <title>深度房贷计算器</title>
+    <meta name="description" content="支持组合贷、利率调整和提前还款的房贷方案计算器">
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    >
 </head>
 <body>
+<a class="skip-link" href="#calculator">跳到计算区域</a>
 
-<div class="app-container">
-    <!-- 头部 -->
+<div class="app-shell">
     <header class="app-header">
-        <div class="header-content">
-            <button class="help-btn" type="button" onclick="openHelpModal()" aria-label="计算方式说明" title="计算方式说明">
-                <i class="fas fa-circle-question"></i>
-            </button>
-
-            <div class="logo">
-                <i class="fas fa-building-columns"></i>
-                <span>深度房贷计算器</span>
+        <div class="brand">
+            <span class="brand-mark" aria-hidden="true"><i class="fas fa-building-columns"></i></span>
+            <div>
+                <h1>深度房贷计算器</h1>
+                <p>组合贷还款方案</p>
             </div>
-            <p class="tagline">智能分析 · 精准计算 · 科学决策</p>
         </div>
+        <button class="icon-btn" id="helpButton" type="button" aria-label="查看计算规则" title="计算规则">
+            <i class="fas fa-circle-question" aria-hidden="true"></i>
+        </button>
     </header>
 
-    <main class="main-content">
-        <!-- 起始日期 -->
-        <div class="date-selector">
-            <div class="date-card">
-                <i class="fas fa-calendar-alt"></i>
-                <div class="date-input-wrap">
-                    <label>首次还款年月</label>
-                    <input type="month" id="startDate" value="2025-01" onchange="updateAllDates()">
+    <main id="calculator" class="main-content">
+        <section class="workspace-section setup-section" aria-labelledby="setupTitle">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">方案设置</p>
+                    <h2 id="setupTitle">基础贷款</h2>
+                </div>
+                <div class="scenario-actions" aria-label="方案操作">
+                    <button class="tool-btn" id="saveScenarioButton" type="button">
+                        <i class="fas fa-floppy-disk" aria-hidden="true"></i><span>保存</span>
+                    </button>
+                    <button class="tool-btn" id="loadScenarioButton" type="button" disabled>
+                        <i class="fas fa-folder-open" aria-hidden="true"></i><span>载入</span>
+                    </button>
+                    <button class="tool-btn" id="shareScenarioButton" type="button">
+                        <i class="fas fa-link" aria-hidden="true"></i><span>分享</span>
+                    </button>
+                    <button class="icon-btn subtle" id="resetScenarioButton" type="button" aria-label="重置方案" title="重置方案">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <!-- 贷款信息卡片 -->
-        <div class="loan-cards">
-            <div class="loan-card commercial">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-landmark"></i>
-                    </div>
-                    <h3>商业贷款</h3>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label>贷款金额</label>
-                        <div class="input-with-unit">
-                            <input type="number" id="comAmount" value="100" inputmode="decimal">
-                            <span class="unit">万元</span>
+            <div class="date-control form-group" data-field-wrap="startDate">
+                <label for="startDate">首次还款年月</label>
+                <input type="month" id="startDate" data-field="startDate" required>
+                <span class="field-error" aria-live="polite"></span>
+            </div>
+
+            <div class="loan-grid">
+                <article class="loan-panel commercial" id="comLoanPanel">
+                    <div class="loan-panel-header">
+                        <div>
+                            <span class="loan-type-dot" aria-hidden="true"></span>
+                            <h3>商业贷款</h3>
                         </div>
+                        <label class="switch-control" for="comEnabled">
+                            <input type="checkbox" id="comEnabled" checked>
+                            <span class="switch-track" aria-hidden="true"></span>
+                            <span>启用</span>
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label>年利率</label>
-                        <div class="input-with-unit">
-                            <input type="number" id="comRate" value="3.1" step="0.01" inputmode="decimal">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>贷款期限</label>
+                    <div class="loan-fields" data-loan-fields="com">
+                        <div class="form-group" data-field-wrap="loans.com.amountWan">
+                            <label for="comAmount">贷款金额</label>
                             <div class="input-with-unit">
-                                <input type="number" id="comYear" value="30" inputmode="numeric">
-                                <span class="unit">年</span>
+                                <input type="number" id="comAmount" min="0.01" max="100000" step="0.01" inputmode="decimal" value="100" data-field="loans.com.amountWan">
+                                <span>万元</span>
                             </div>
+                            <span class="field-error" aria-live="polite"></span>
                         </div>
-                        <div class="form-group">
-                            <label>还款方式</label>
-                            <select id="comMethod">
-                                <option value="1">等额本息</option>
-                                <option value="2">等额本金</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="loan-card fund">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <i class="fas fa-piggy-bank"></i>
-                    </div>
-                    <h3>公积金贷款</h3>
-                </div>
-                <div class="card-body">
-                    <div class="form-group">
-                        <label>贷款金额</label>
-                        <div class="input-with-unit">
-                            <input type="number" id="fundAmount" value="100" inputmode="decimal">
-                            <span class="unit">万元</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>年利率</label>
-                        <div class="input-with-unit">
-                            <input type="number" id="fundRate" value="2.85" step="0.01" inputmode="decimal">
-                            <span class="unit">%</span>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>贷款期限</label>
+                        <div class="form-group" data-field-wrap="loans.com.ratePercent">
+                            <label for="comRate">年利率</label>
                             <div class="input-with-unit">
-                                <input type="number" id="fundYear" value="30" inputmode="numeric">
-                                <span class="unit">年</span>
+                                <input type="number" id="comRate" min="0" max="30" step="0.01" inputmode="decimal" value="3.1" data-field="loans.com.ratePercent">
+                                <span>%</span>
                             </div>
+                            <span class="field-error" aria-live="polite"></span>
                         </div>
-                        <div class="form-group">
-                            <label>还款方式</label>
-                            <select id="fundMethod">
-                                <option value="1">等额本息</option>
-                                <option value="2">等额本金</option>
+                        <div class="form-group" data-field-wrap="loans.com.years">
+                            <label for="comYear">贷款期限</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="comYear" min="1" max="50" step="1" inputmode="numeric" value="30" data-field="loans.com.years">
+                                <span>年</span>
+                            </div>
+                            <span class="field-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group" data-field-wrap="loans.com.method">
+                            <label for="comMethod">还款方式</label>
+                            <select id="comMethod" data-field="loans.com.method">
+                                <option value="annuity">等额本息</option>
+                                <option value="equal-principal">等额本金</option>
                             </select>
+                            <span class="field-error" aria-live="polite"></span>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
+                </article>
 
-        <!-- 事件管理 -->
-        <div class="events-section">
-            <div class="event-card">
-                <div class="event-header">
-                    <i class="fas fa-chart-line"></i>
-                    <h4>利率调整</h4>
+                <article class="loan-panel fund" id="fundLoanPanel">
+                    <div class="loan-panel-header">
+                        <div>
+                            <span class="loan-type-dot" aria-hidden="true"></span>
+                            <h3>公积金贷款</h3>
+                        </div>
+                        <label class="switch-control" for="fundEnabled">
+                            <input type="checkbox" id="fundEnabled" checked>
+                            <span class="switch-track" aria-hidden="true"></span>
+                            <span>启用</span>
+                        </label>
+                    </div>
+                    <div class="loan-fields" data-loan-fields="fund">
+                        <div class="form-group" data-field-wrap="loans.fund.amountWan">
+                            <label for="fundAmount">贷款金额</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fundAmount" min="0.01" max="100000" step="0.01" inputmode="decimal" value="100" data-field="loans.fund.amountWan">
+                                <span>万元</span>
+                            </div>
+                            <span class="field-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group" data-field-wrap="loans.fund.ratePercent">
+                            <label for="fundRate">年利率</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fundRate" min="0" max="30" step="0.01" inputmode="decimal" value="2.85" data-field="loans.fund.ratePercent">
+                                <span>%</span>
+                            </div>
+                            <span class="field-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group" data-field-wrap="loans.fund.years">
+                            <label for="fundYear">贷款期限</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="fundYear" min="1" max="50" step="1" inputmode="numeric" value="30" data-field="loans.fund.years">
+                                <span>年</span>
+                            </div>
+                            <span class="field-error" aria-live="polite"></span>
+                        </div>
+                        <div class="form-group" data-field-wrap="loans.fund.method">
+                            <label for="fundMethod">还款方式</label>
+                            <select id="fundMethod" data-field="loans.fund.method">
+                                <option value="annuity">等额本息</option>
+                                <option value="equal-principal">等额本金</option>
+                            </select>
+                            <span class="field-error" aria-live="polite"></span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="workspace-section" aria-labelledby="eventsTitle">
+            <div class="section-heading compact">
+                <div>
+                    <p class="section-kicker">时间轴</p>
+                    <h2 id="eventsTitle">变动事件</h2>
                 </div>
-                <div id="rateList" class="event-list"></div>
-                <button class="btn-add" onclick="addRateRow()">
-                    <i class="fas fa-plus"></i>
-                    添加利率调整
+                <button class="tool-btn" id="loadExampleButton" type="button">
+                    <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i><span>载入示例</span>
                 </button>
             </div>
 
-            <div class="event-card">
-                <div class="event-header">
-                    <i class="fas fa-hand-holding-dollar"></i>
-                    <h4>提前还款</h4>
+            <div class="event-grid">
+                <div class="event-panel">
+                    <div class="event-panel-header">
+                        <h3>利率调整</h3>
+                        <button class="icon-btn small" id="addRateButton" type="button" aria-label="添加利率调整" title="添加利率调整">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div id="rateList" class="event-list" aria-live="polite"></div>
+                    <p class="empty-state" id="rateEmpty">暂无利率调整</p>
                 </div>
-                <div id="prepayList" class="event-list"></div>
-                <button class="btn-add" onclick="addPrepayRow()">
-                    <i class="fas fa-plus"></i>
-                    添加提前还款
-                </button>
-            </div>
-        </div>
 
-        <!-- 提示信息 -->
-        <div class="tip-card">
-            <div class="tip-icon">
-                <i class="fas fa-lightbulb"></i>
+                <div class="event-panel">
+                    <div class="event-panel-header">
+                        <h3>提前还款</h3>
+                        <button class="icon-btn small" id="addPrepaymentButton" type="button" aria-label="添加提前还款" title="添加提前还款">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div id="prepaymentList" class="event-list" aria-live="polite"></div>
+                    <p class="empty-state" id="prepaymentEmpty">暂无提前还款</p>
+                </div>
             </div>
-            <div class="tip-content">
-                <strong>智能建议</strong>
-                <p>缩短年限通常比减少月供能节省更多利息，但减少月供能降低每月还款压力。请根据自身现金流情况合理选择。</p>
-            </div>
-        </div>
 
-        <!-- 计算按钮 -->
-        <button class="btn-calculate" onclick="calculateAll()">
-            <i class="fas fa-calculator"></i>
-            生成还款计划
+            <details class="calculation-rules">
+                <summary>计算口径</summary>
+                <p>同一期按“利率调整、正常月供、提前还款”的顺序执行；减少月供或缩短期限从下一期生效，金额逐期按分舍入。</p>
+            </details>
+        </section>
+
+        <div id="validationSummary" class="validation-summary" role="alert" tabindex="-1" hidden></div>
+
+        <button class="calculate-button" id="calculateButton" type="button">
+            <i class="fas fa-calculator" aria-hidden="true"></i>
+            <span>生成还款计划</span>
         </button>
 
-        <!-- 分析面板 -->
-        <div id="analysisArea" class="analysis-panel">
-            <div class="panel-header">
-                <i class="fas fa-chart-pie"></i>
-                <h3>变动影响分析</h3>
-                <span class="badge">对比原计划</span>
+        <section id="analysisArea" class="results-section" aria-labelledby="analysisTitle" hidden>
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">方案对比</p>
+                    <h2 id="analysisTitle">变动影响</h2>
+                </div>
+                <span class="status-badge">与无事件方案对比</span>
             </div>
+
+            <div id="calculationWarnings" class="calculation-warnings" role="status" hidden></div>
 
             <div class="stats-grid">
-                <div class="stat-card savings">
-                    <div class="stat-icon">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">累计节省</span>
-                        <strong id="diffInterest">¥0</strong>
-                    </div>
+                <div class="metric-block">
+                    <span>累计利息变化</span>
+                    <strong id="diffInterest">¥0</strong>
                 </div>
-                <div class="stat-card time">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-label">周期变化</span>
-                        <strong id="diffTime">0 个月</strong>
-                    </div>
+                <div class="metric-block">
+                    <span>商贷期限变化</span>
+                    <strong id="diffComTime">0 个月</strong>
+                </div>
+                <div class="metric-block">
+                    <span>公积金期限变化</span>
+                    <strong id="diffFundTime">0 个月</strong>
                 </div>
             </div>
 
-            <div class="chart-card">
-                <h5><i class="fas fa-chart-area"></i> 本金剩余趋势对比</h5>
+            <figure class="chart-figure">
+                <figcaption>剩余本金趋势</figcaption>
                 <div class="chart-container">
-                    <canvas id="loanChart"></canvas>
+                    <canvas id="loanChart" role="img" aria-label="原计划与当前计划的剩余本金趋势对比" aria-describedby="chartSummary">
+                        原计划与当前计划的剩余本金趋势对比图
+                    </canvas>
                 </div>
-                <div class="chart-legend">
-                    <span class="legend-item old"><span class="line dashed"></span>原计划</span>
-                    <span class="legend-item new"><span class="line solid"></span>新计划</span>
+                <div class="chart-legend" aria-hidden="true">
+                    <span><i class="legend-line original"></i>原计划</span>
+                    <span><i class="legend-line current"></i>当前计划</span>
                 </div>
-            </div>
+                <p id="chartSummary" class="sr-only"></p>
+            </figure>
 
-            <div class="detail-card">
-                <h5><i class="fas fa-list-check"></i> 变动收益明细</h5>
-                <div class="table-wrap">
+            <div class="table-region">
+                <h3>事件影响明细</h3>
+                <div class="table-scroll" tabindex="0" aria-label="事件影响明细，可横向滚动">
                     <table class="detail-table">
                         <thead>
                             <tr>
-                                <th>时间</th>
-                                <th>事件</th>
-                                <th>利息变动</th>
-                                <th>时间变动</th>
+                                <th scope="col">时间</th>
+                                <th scope="col">事件</th>
+                                <th scope="col">利息变化</th>
+                                <th scope="col">商贷期限</th>
+                                <th scope="col">公积金期限</th>
                             </tr>
                         </thead>
                         <tbody id="analysisDetailBody"></tbody>
                     </table>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 结果区域 -->
-        <div id="resultArea" class="result-panel">
-            <div class="panel-header">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <h3>还款计划表</h3>
+        <section id="resultArea" class="results-section" aria-labelledby="resultTitle" hidden>
+            <div class="section-heading result-heading">
+                <div>
+                    <p class="section-kicker">月度明细</p>
+                    <h2 id="resultTitle">还款计划</h2>
+                </div>
+                <button class="tool-btn" id="exportCsvButton" type="button" disabled>
+                    <i class="fas fa-download" aria-hidden="true"></i><span>导出 CSV</span>
+                </button>
             </div>
 
             <div class="summary-grid">
-                <div class="summary-card total">
-                    <i class="fas fa-wallet"></i>
-                    <div>
-                        <span>还款总额</span>
-                        <strong id="resTotal">¥0</strong>
-                    </div>
-                </div>
-                <div class="summary-card interest">
-                    <i class="fas fa-percent"></i>
-                    <div>
-                        <span>利息总额</span>
-                        <strong id="resInterest">¥0</strong>
-                    </div>
-                </div>
-                <div class="summary-card commercial">
-                    <i class="fas fa-landmark"></i>
-                    <div>
-                        <span>商贷利息</span>
-                        <strong id="resComInt">¥0</strong>
-                    </div>
-                </div>
-                <div class="summary-card fund">
-                    <i class="fas fa-piggy-bank"></i>
-                    <div>
-                        <span>公积金利息</span>
-                        <strong id="resFundInt">¥0</strong>
-                    </div>
-                </div>
+                <div class="summary-item"><span>还款总额</span><strong id="resTotal">¥0</strong></div>
+                <div class="summary-item"><span>利息总额</span><strong id="resInterest">¥0</strong></div>
+                <div class="summary-item commercial"><span>商贷利息</span><strong id="resComInt">¥0</strong></div>
+                <div class="summary-item fund"><span>公积金利息</span><strong id="resFundInt">¥0</strong></div>
             </div>
 
-            <div class="schedule-card">
-                <div class="table-wrap">
-                    <table class="schedule-table">
-                        <thead>
-                            <tr>
-                                <th>期数</th>
-                                <th>日期</th>
-                                <th>月供合计</th>
-                                <th>商贷</th>
-                                <th>公积金</th>
-                                <th>剩余本金</th>
-                                <th>备注</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultBody"></tbody>
-                    </table>
+            <div class="table-toolbar">
+                <div class="segmented-control" aria-label="还款计划显示范围">
+                    <button type="button" data-table-filter="key" aria-pressed="true">关键期数</button>
+                    <button type="button" data-table-filter="year">年度</button>
+                    <button type="button" data-table-filter="all">全部</button>
                 </div>
+                <span id="tableRowCount" class="row-count"></span>
             </div>
-        </div>
+
+            <div class="table-scroll schedule-scroll" tabindex="0" aria-label="还款计划，可横向和纵向滚动">
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">期数</th>
+                            <th scope="col">日期</th>
+                            <th scope="col">月供合计</th>
+                            <th scope="col">商贷</th>
+                            <th scope="col">公积金</th>
+                            <th scope="col">偿还本金</th>
+                            <th scope="col">利息</th>
+                            <th scope="col">剩余本金</th>
+                            <th scope="col">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultBody"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <footer class="app-footer">
-        <p>© 2025 深度房贷计算器 · 仅供参考，请以实际为准</p>
+        <p>© <span id="currentYear"></span> 深度房贷计算器 · 计算结果仅供方案比较</p>
     </footer>
 </div>
 
-<!-- 模板 -->
-<template id="tpl-rate">
-    <div class="event-row" onchange="updateRowColor(this)">
-        <div class="event-row-content">
-            <select class="evt-type">
+<template id="rateEventTemplate">
+    <div class="event-row" data-event-kind="rate">
+        <div class="event-fields">
+            <label class="sr-only">贷款类型</label>
+            <select data-event-field="loanType" aria-label="贷款类型">
                 <option value="com">商贷</option>
                 <option value="fund">公积金</option>
             </select>
-            <div class="input-group">
-                <input type="number" class="evt-month" placeholder="期数" inputmode="numeric" oninput="updateDatePreview(this)">
-                <span class="date-badge">---</span>
+            <div class="event-date-field">
+                <input type="number" min="1" max="600" step="1" inputmode="numeric" placeholder="期数" data-event-field="month" aria-label="生效期数">
+                <span class="date-badge" aria-live="polite">--</span>
             </div>
-            <div class="input-with-unit small">
-                <input type="number" class="evt-val" placeholder="利率" step="0.01" inputmode="decimal">
-                <span class="unit">%</span>
+            <div class="input-with-unit compact">
+                <input type="number" min="0" max="30" step="0.01" inputmode="decimal" placeholder="新利率" data-event-field="ratePercent" aria-label="调整后年利率">
+                <span>%</span>
             </div>
-            <button class="btn-del" onclick="this.closest('.event-row').remove()">
-                <i class="fas fa-trash-alt"></i>
+            <button class="icon-btn danger small" type="button" data-action="remove-event" aria-label="删除利率调整" title="删除">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>
             </button>
         </div>
+        <span class="event-error" aria-live="polite"></span>
     </div>
 </template>
 
-<template id="tpl-prepay">
-    <div class="event-row" onchange="updateRowColor(this)">
-        <div class="event-row-content">
-            <select class="evt-type">
+<template id="prepaymentEventTemplate">
+    <div class="event-row" data-event-kind="prepayment">
+        <div class="event-fields">
+            <label class="sr-only">贷款类型</label>
+            <select data-event-field="loanType" aria-label="贷款类型">
                 <option value="com">商贷</option>
                 <option value="fund">公积金</option>
             </select>
-            <div class="input-group">
-                <input type="number" class="evt-month" placeholder="期数" inputmode="numeric" oninput="updateDatePreview(this)">
-                <span class="date-badge">---</span>
+            <div class="event-date-field">
+                <input type="number" min="1" max="600" step="1" inputmode="numeric" placeholder="期数" data-event-field="month" aria-label="提前还款期数">
+                <span class="date-badge" aria-live="polite">--</span>
             </div>
-            <div class="input-with-unit small">
-                <input type="number" class="evt-val" placeholder="金额" inputmode="decimal">
-                <span class="unit">万</span>
+            <div class="input-with-unit compact">
+                <input type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="金额" data-event-field="amountWan" aria-label="提前还款金额">
+                <span>万</span>
             </div>
-            <select class="evt-strat">
-                <option value="1">减月供</option>
-                <option value="2">减年限</option>
+            <select data-event-field="strategy" aria-label="提前还款策略">
+                <option value="reduce-payment">减月供</option>
+                <option value="reduce-term">减年限</option>
             </select>
-            <button class="btn-del" onclick="this.closest('.event-row').remove()">
-                <i class="fas fa-trash-alt"></i>
+            <button class="icon-btn danger small" type="button" data-action="remove-event" aria-label="删除提前还款" title="删除">
+                <i class="fas fa-trash-can" aria-hidden="true"></i>
             </button>
         </div>
+        <span class="event-error" aria-live="polite"></span>
     </div>
 </template>
 
-<!-- 计算说明弹窗 -->
-<div id="helpModal" class="modal-overlay" aria-hidden="true" style="display:none;">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+<div id="helpModal" class="modal-overlay" role="presentation" hidden>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" aria-describedby="helpDescription">
         <div class="modal-header">
-            <h3 id="helpTitle"><i class="fas fa-circle-info"></i> 计算方式说明</h3>
-            <button class="modal-close" type="button" onclick="closeHelpModal()" aria-label="关闭">
-                <i class="fas fa-xmark"></i>
+            <h2 id="helpTitle">计算规则</h2>
+            <button class="icon-btn" id="closeHelpButton" type="button" aria-label="关闭计算规则">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
             </button>
         </div>
-
-        <div class="modal-body">
-            <p style="margin-bottom:10px;">
-                本工具用于模拟组合贷（商贷/公积金）在<strong>利率调整</strong>与<strong>提前还款</strong>情况下的还款计划变化，帮助对比“减月供/减年限”策略。
-            </p>
-
-            <div class="modal-section">
-                <h4>核心规则</h4>
-                <ul>
-                    <li>按<strong>月</strong>进行迭代；每月利息约为：剩余本金 × (年利率/12)。</li>
-                    <li>等额本息：使用按剩余期数重算的月供公式；等额本金：本金按剩余期数均摊。</li>
-                    <li>利率调整：在指定“期数”起生效（从该期开始使用新年利率）。</li>
-                    <li>提前还款：在指定“期数”发生，支持“减月供 / 减年限”。</li>
-                </ul>
-            </div>
-
-            <div class="modal-section">
-                <h4>与实际可能存在轻微差异（重要）</h4>
-                <ul>
-                    <li>银行计息口径、扣款顺序（先扣月供还是先扣提前还款）、重定价日规则、日息/按月计息等细节可能不同。</li>
-                    <li>四舍五入与金额精度处理（元/分）会带来末期微小差异。</li>
-                    <li>罚息、违约金、最低提前还款额、次数限制等政策不在模拟范围内。</li>
-                </ul>
-                <p style="color:var(--gray-600); font-size:0.9em; margin-top:8px;">
-                    结论请以贷款合同与银行实际扣款为准。本工具仅供参考与方案对比。
-                </p>
-            </div>
+        <div class="modal-body" id="helpDescription">
+            <section>
+                <h3>每期顺序</h3>
+                <ol>
+                    <li>应用当期新年利率。</li>
+                    <li>按剩余本金和期限支付正常月供。</li>
+                    <li>正常月供后执行提前还款，策略从下一期生效。</li>
+                </ol>
+            </section>
+            <section>
+                <h3>金额口径</h3>
+                <p>每月利息、偿还本金和月供均按人民币分四舍五入，末期一次结清剩余本金。</p>
+            </section>
+            <section>
+                <h3>适用范围</h3>
+                <p>结果未包含按日计息、违约金、银行最低还款额及具体重定价日规则，请以贷款合同和银行结果为准。</p>
+            </section>
         </div>
-
         <div class="modal-footer">
-            <button class="modal-btn" type="button" onclick="closeHelpModal()">我知道了</button>
+            <button class="primary-button" id="confirmHelpButton" type="button">关闭</button>
         </div>
     </div>
 </div>
 
-<script src="script.js"></script>
+<div id="shareModal" class="modal-overlay" role="presentation" hidden>
+    <div class="modal-dialog share-dialog" role="dialog" aria-modal="true" aria-labelledby="shareTitle" aria-describedby="shareDescription">
+        <div class="modal-header">
+            <h2 id="shareTitle">分享方案</h2>
+            <button class="icon-btn" id="closeShareButton" type="button" aria-label="关闭分享方案">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="shareDescription">链接包含当前输入数据，获得链接的人可以在浏览器中载入同一方案。</p>
+            <label class="share-link-label" for="shareLinkInput">方案链接</label>
+            <input class="share-link-input" id="shareLinkInput" type="text" readonly>
+        </div>
+        <div class="modal-footer">
+            <button class="tool-btn" id="cancelShareButton" type="button">关闭</button>
+            <button class="primary-button" id="copyShareLinkButton" type="button">
+                <i class="fas fa-copy" aria-hidden="true"></i> 复制链接
+            </button>
+        </div>
+    </div>
+</div>
 
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="loan-engine.js" defer></script>
+<script src="validation.js" defer></script>
+<script src="renderers.js" defer></script>
+<script src="app.js" defer></script>
 </body>
 </html>
