@@ -4,6 +4,10 @@
   <p><a href="https://SeanWong17.github.io/Deep-Mortgage-Calculator/">在线使用</a></p>
 </div>
 
+## 页面预览
+
+![深度房贷计算器页面预览](example.jpg)
+
 ## 功能
 
 - 商业贷款和公积金贷款可分别启用并设置金额、利率、期限及还款方式
